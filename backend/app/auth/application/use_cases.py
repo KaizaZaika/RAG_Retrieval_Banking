@@ -30,7 +30,8 @@ class RegisterUser:
             id=user.id,
             username=user.username,
             email=user.email,
-            is_active=user.is_active
+            is_active=user.is_active,
+            role=user.role
         )
 
 class LoginUser:
@@ -59,3 +60,20 @@ class LoginUser:
         token = self._token_service.create_access_token(str(user.id))
         
         return TokenResult(access_token=token)
+class GetCurrentUser:
+    def __init__(self, user_repository: UserRepository) -> None:
+        self._user_repository = user_repository
+
+    def get_user(self, user_id: uuid.UUID) -> RegisterResult:
+        user = self._user_repository.get_by_id(user_id)
+
+        if user is None:
+            raise InvalidCredentialsError("User no longer exists.")
+
+        return RegisterResult(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            is_active=user.is_active,
+            role=user.role,
+        )

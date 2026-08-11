@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from app.auth.domain.roles import Role
 import uuid
 
 @dataclass
@@ -13,6 +14,7 @@ class RegisterResult:
     username: str
     email: str
     is_active: bool
+    role: Role
 
 @dataclass
 class LoginInput:

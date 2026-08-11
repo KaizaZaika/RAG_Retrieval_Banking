@@ -9,7 +9,7 @@ from .schemas import (
     TokenResponseSchema,
     ErrorResponseSchema
 )
-from .dependencies import get_register_use_case, get_login_use_case
+from .dependencies import get_register_use_case, get_login_use_case, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -35,7 +35,8 @@ def register(
             id=result.id,
             username=result.username,
             email=result.email,
-            is_active=result.is_active
+            is_active=result.is_active,
+            role=result.role,
         )
     except UserAlreadyExistsError as e:
         raise HTTPException(
@@ -76,3 +77,17 @@ def login(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=str(e)
         )
+@router.get(
+    "/me",
+    response_model=UserResponseSchema,
+)
+def me(
+    current_user=Depends(get_current_user),
+):
+    return UserResponseSchema(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        is_active=current_user.is_active,
+        role=current_user.role,
+    )

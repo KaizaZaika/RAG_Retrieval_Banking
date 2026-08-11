@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 import uuid
-
+from app.auth.domain.roles import Role
 class RegisterRequestSchema(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
@@ -11,6 +11,7 @@ class UserResponseSchema(BaseModel):
     username: str
     email: EmailStr
     is_active: bool
+    role: Role
 
 class LoginRequestSchema(BaseModel):
     email: EmailStr
