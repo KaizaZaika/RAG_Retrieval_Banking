@@ -1,10 +1,13 @@
-import uuid 
 from dataclasses import dataclass, field
-from enum import Enum 
+from enum import Enum
+import uuid
+
+
 class DocumentStatus(str, Enum):
+    UPLOADING = "uploading"
     UPLOADED = "uploaded"
     PROCESSING = "processing"
-    READY = "ready"
+    PROCESSED = "processed"
     FAILED = "failed"
 
 
@@ -15,4 +18,4 @@ class Document:
     uploaded_by: uuid.UUID
 
     id: uuid.UUID = field(default_factory=uuid.uuid4)
-    status: DocumentStatus = DocumentStatus.UPLOADED
+    status: DocumentStatus = DocumentStatus.UPLOADING

@@ -1,85 +1,44 @@
-import uuid
+from typing import BinaryIO
 
 from app.documents.application.models import (
-    ParseDocumentResult,
     UploadDocumentInput,
-    UploadDocumentResult,
+    UploadDocumentOutput,
 )
-from app.documents.domain.entities import Document, DocumentStatus
-from app.documents.domain.exceptions import (
-    DocumentNotFoundError,
-    DocumentParsingError,
-)
-from app.documents.domain.repositories import DocumentRepository
-from app.documents.domain.services import DocumentParser
+from app.documents.domain.entities import Document
+from app.documents.domain.repositories import DocumentStorage
 
 
-class UploadDocument:
+class UploadDocuments:
     def __init__(
         self,
-        document_repository: DocumentRepository,
+        document_storage: DocumentStorage,
     ) -> None:
-        self._document_repository = document_repository
+        self._document_storage = document_storage
 
     def upload_document(
         self,
-        upload_request: UploadDocumentInput,
-    ) -> UploadDocumentResult:
+        document_input: UploadDocumentInput,
+        file: BinaryIO,
+    ) -> UploadDocumentOutput:
+
         document = Document(
-            filename=upload_request.filename,
-            content_type=upload_request.content_type,
-            uploaded_by=upload_request.uploaded_by,
+            filename=document_input.filename,
+            content_type=document_input.content_type,
+            uploaded_by=document_input.uploaded_by,
         )
 
-        self._document_repository.add(document)
-
-        return UploadDocumentResult(
+        storage_key = self._document_storage.store_document(
             document_id=document.id,
             filename=document.filename,
+            file=file,
             content_type=document.content_type,
-            status=document.status,
         )
 
-
-class ParseDocument:
-    def __init__(
-        self,
-        document_repository: DocumentRepository,
-        document_parser: DocumentParser,
-    ) -> None:
-        self._document_repository = document_repository
-        self._document_parser = document_parser
-
-    def parse_document(
-        self,
-        document_id: uuid.UUID,
-        file_path: str,
-    ) -> ParseDocumentResult:
-        document = self._document_repository.get_by_id(document_id)
-
-        if document is None:
-            raise DocumentNotFoundError(
-                f"Document {document_id} was not found."
-            )
-
-        document.status = DocumentStatus.PROCESSING
-        self._document_repository.update(document)
-
-        try:
-            parsed_document = self._document_parser.parse(file_path)
-        except Exception as error:
-            document.status = DocumentStatus.FAILED
-            self._document_repository.update(document)
-
-            raise DocumentParsingError(
-                f"Failed to parse document {document_id}."
-            ) from error
-
-        document.status = DocumentStatus.READY
-        self._document_repository.update(document)
-
-        return ParseDocumentResult(
-            document_id=document.id,
-            markdown=parsed_document.markdown,
-            status=document.status,
+        return UploadDocumentOutput(
+            id=document.id,
+            filename=document.filename,
+            content_type=document.content_type,
+            uploaded_by=document.uploaded_by,
+            status=document.status.value,
+            storage_key=storage_key,
         )

@@ -1,26 +1,17 @@
-import uuid
 from dataclasses import dataclass
+from uuid import UUID
 
-from app.documents.domain.entities import DocumentStatus
 
-
-@dataclass(frozen=True)
+@dataclass
+class UploadDocumentOutput:
+    id: UUID
+    filename: str
+    content_type: str
+    uploaded_by: UUID
+    status: str
+    storage_key: str
+@dataclass
 class UploadDocumentInput:
     filename: str
     content_type: str
-    uploaded_by: uuid.UUID
-
-
-@dataclass(frozen=True)
-class UploadDocumentResult:
-    document_id: uuid.UUID
-    filename: str
-    content_type: str
-    status: DocumentStatus
-
-
-@dataclass(frozen=True)
-class ParseDocumentResult:
-    document_id: uuid.UUID
-    markdown: str
-    status: DocumentStatus
+    uploaded_by: UUID

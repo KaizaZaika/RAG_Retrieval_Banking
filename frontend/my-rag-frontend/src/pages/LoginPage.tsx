@@ -1,5 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  Alert,
+  Anchor,
+  Button,
+  Container,
+  Paper,
+  PasswordInput,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
 
 import { loginUser } from "../api";
 
@@ -15,11 +27,10 @@ export default function LoginPage({ onLogin }: Props) {
   const navigate = useNavigate();
 
   async function handleLogin() {
+    setMessage("");
+
     try {
-      const result = await loginUser(
-        email,
-        password
-      );
+      const result = await loginUser(email, password);
 
       onLogin(result.access_token);
       navigate("/me");
@@ -33,37 +44,61 @@ export default function LoginPage({ onLogin }: Props) {
   }
 
   return (
-    <main>
-      <h1>Login</h1>
+    <Container size={420} my={80}>
+      <Title ta="center" mb="xs">
+        Welcome back
+      </Title>
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(event) =>
-          setEmail(event.target.value)
-        }
-      />
+      <Text c="dimmed" size="sm" ta="center" mb="xl">
+        Sign in to your RAG Banking account
+      </Text>
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(event) =>
-          setPassword(event.target.value)
-        }
-      />
+      <Paper withBorder shadow="md" p="xl" radius="md">
+        <Stack>
+          <TextInput
+            label="Email"
+            placeholder="you@example.com"
+            type="email"
+            value={email}
+            onChange={(event) =>
+              setEmail(event.currentTarget.value)
+            }
+            required
+          />
 
-      <button onClick={handleLogin}>
-        Login
-      </button>
+          <PasswordInput
+            label="Password"
+            placeholder="Your password"
+            value={password}
+            onChange={(event) =>
+              setPassword(event.currentTarget.value)
+            }
+            required
+          />
 
-      {message && <p>{message}</p>}
+          {message && (
+            <Alert color="red" title="Login failed">
+              {message}
+            </Alert>
+          )}
 
-      <p>
-        No account?{" "}
-        <Link to="/register">Register</Link>
-      </p>
-    </main>
+          <Button
+            fullWidth
+            size="md"
+            onClick={handleLogin}
+          >
+            Login
+          </Button>
+
+          <Text size="sm" ta="center">
+            Don't have an account?{" "}
+            <Anchor component={Link} to="/register">
+              Register
+            </Anchor>
+          </Text>
+        </Stack>
+      </Paper>
+    </Container>
   );
 }
+

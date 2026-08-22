@@ -1,18 +1,23 @@
-
 from abc import ABC, abstractmethod
-import uuid
+from typing import BinaryIO
+from uuid import UUID
+from app.documents.domain.entities import Document
 
-from .entities import Document
 
-class DocumentRepository(Protocol):
-    def add(self, document: Document) -> None:
-        ...
+class DocumentRepository(ABC):
 
-    def get_by_id(
+    @abstractmethod
+    def add_document(self, document: Document) -> None:
+        pass
+
+class DocumentStorage(ABC):
+    @abstractmethod
+    def store_document(
         self,
-        document_id: uuid.UUID,
-    ) -> Document | None:
-        ...
-
-    def update(self, document: Document) -> None:
-        ...
+        document_id: UUID,
+        filename: str,
+        file: BinaryIO,
+        content_type: str,
+    ) -> str:
+        """Store a document and return its storage key."""
+        raise NotImplementedError
